@@ -1,5 +1,13 @@
 <?php
-// A continuation of test.sh...
+// modified "test.php" to look up a hash string immedietely
+// root@KenGannonKaliVM:/media/root/yay/crackstation-hashdb# echo -n "Ken" | sha1sum
+// 19f40a75cecc713623c04de47639dbac43cf9b56  -
+// root@KenGannonKaliVM:/media/root/yay/crackstation-hashdb# php ./crack.php 19f40a75cecc713623c04de47639dbac43cf9b56
+// [+] Successfully cracked [19f40a75cecc713623c04de47639dbac43cf9b56] using [sha1] as [Ken].
+// [+] Successfully cracked [19f40a75cecc7136] using [sha1] as [Ken] (as partial match).
+// [-] Failed to crack [19f40a75cecc713623c04de47639dbac43cf9b56] using [md5].
+// [-] Failed to crack [19f40a75cecc713623c04de47639dbac43cf9b56] using [md5] (partial match).
+
 
 require_once('LookupTable.php');
 require_once('MoreHashes.php');
@@ -9,21 +17,21 @@ if (count($argv) !== 2) {
     exit(1);
 }
 
-$algorithms = array("md5", "sha1", "NTLM", "LM");
-$counter = 3;
+$algorithms = array("md5", "md5(md5)", "sha1", "NTLM", "LM");
+$counter = 1;
 $hash_string = $argv[1];
 
 function crackHash($hash_algorithm, $hash_string) {
     $colors = new Colors();
     $fullCounter = 1;
     $halfCounter = 1;
-    $lookup = new LookupTable("test-index-files/test-words-$hash_algorithm.idx", "test/words.txt", $hash_algorithm);
+    $lookup = new LookupTable("../hash_$hash_algorithm.idx", "../realuniq.lst", $hash_algorithm);
 
     $hasher = MoreHashAlgorithms::GetHashFunction($hash_algorithm);
 
-    $fh = fopen("test/words.txt", "r");
+    $fh = fopen("../realuniq.lst", "r");
     if ($fh === false) {
-        echo "Error opening words.txt";
+        echo "Error opening realuniq.lst";
         exit(1);
     }
 
@@ -44,11 +52,11 @@ function crackHash($hash_algorithm, $hash_string) {
 
         // Full match.
         $results = $lookup->crack($to_crack);
-        if (count($results) !== $count || $results[0]->getPlaintext() !== "$word" || $results[0]->isFullMatch() !== true) {
+        if (count($results) !== $count || $results[0]->isFullMatch() !== true) {
             $fullCounter = 0;
         } else {
             $cracked = $results[0]->getPlaintext();
-           echo $colors->getColoredString("[+] Successfully cracked [$to_crack] using [$hash_algorithm] as [$cracked].", "green", "black") . "\n";
+           	echo $colors->getColoredString("[+] Successfully cracked [$to_crack] using [$hash_algorithm] as [$cracked].", "green", "black") . "\n";
         }
 
         foreach ($results as $result) {
@@ -61,7 +69,7 @@ function crackHash($hash_algorithm, $hash_string) {
         $to_crack = substr($to_crack, 0, 16);
         $results = $lookup->crack($to_crack);
 
-        if (count($results) !== $count || $results[0]->getPlaintext() !== "$word" || $results[0]->isFullMatch() !== false) {
+        if (count($results) !== $count || $results[0]->isFullMatch() !== false) {
             $halfCounter = 0;
         } else {
             $cracked = $results[0]->getPlaintext();
@@ -73,6 +81,7 @@ function crackHash($hash_algorithm, $hash_string) {
                 echo "Algorithm name is not set correctly (partial match).";
             }
         }
+        break;
     }
     
     if ($fullCounter == 0){
@@ -84,6 +93,7 @@ function crackHash($hash_algorithm, $hash_string) {
     }
 
     fclose($fh);
+
 }
 
 function printFailureFull($hash_algorithm, $hash_string){
