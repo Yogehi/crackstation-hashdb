@@ -18,7 +18,7 @@ if (count($argv) !== 2) {
 }
 
 $algorithms = array("md5", "md5(md5)", "sha1", "NTLM", "LM");
-$counter = 1;
+$counter = 3;
 $hash_string = $argv[1];
 
 function crackHash($hash_algorithm, $hash_string) {
