@@ -25,11 +25,11 @@ function crackHash($hash_algorithm, $hash_string) {
     $colors = new Colors();
     $fullCounter = 1;
     $halfCounter = 1;
-    $lookup = new LookupTable("../hash_$hash_algorithm.idx", "../realuniq.lst", $hash_algorithm);
+    $lookup = new LookupTable("./hash_$hash_algorithm.idx", "./realuniq.lst", $hash_algorithm);
 
     $hasher = MoreHashAlgorithms::GetHashFunction($hash_algorithm);
 
-    $fh = fopen("../realuniq.lst", "r");
+    $fh = fopen("./realuniq.lst", "r");
     if ($fh === false) {
         echo "Error opening realuniq.lst";
         exit(1);
